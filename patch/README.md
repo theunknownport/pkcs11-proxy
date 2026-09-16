@@ -65,6 +65,25 @@ upstream `master`), just open `gck-rpc-util.c` and apply the same change
 by hand to `gck_rpc_mechanism_has_sane_parameters()` — it's a single,
 self-contained function.
 
+## Build note: `CKM_AES_GCM` undeclared
+
+If your build fails with:
+
+```
+error: 'CKM_AES_GCM' undeclared (first use in this function)
+```
+
+it's because the `pkcs11.h` bundled in this project (`pkcs11/pkcs11.h`)
+implements **PKCS#11 v2.20** — `CKM_AES_GCM` was only added in **v2.40**
+(2015), so the constant simply doesn't exist in the vendored header.
+`CKM_AES_CBC`/`CKM_AES_CBC_PAD` are older (v2.11) and compile fine.
+
+The patch adds a guarded fallback define in `gck-rpc-util.c` (value
+`0x00001087`, taken from the official PKCS#11 v2.40 mechanism list) so
+this compiles regardless of which `pkcs11.h` you're building against —
+if you later switch to a v2.40+ header, the `#ifndef` means this
+fallback is simply skipped.
+
 ## Building
 
 ```bash

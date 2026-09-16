@@ -30,6 +30,16 @@
 #include <string.h>
 #include <stdio.h>
 
+/*
+ * The pkcs11.h bundled with this project (pkcs11/pkcs11.h) implements
+ * PKCS#11 v2.20. CKM_AES_GCM was only added in PKCS#11 v2.40, so on
+ * builds using the bundled header it's undefined. Value taken from the
+ * official PKCS#11 v2.40 mechanism list (OASIS PKCS11-spec-v2.40).
+ */
+#ifndef CKM_AES_GCM
+#define CKM_AES_GCM 0x00001087
+#endif
+
 static void do_log(const char *pref, const char *msg, va_list va)
 {
 	char buffer[1024];
