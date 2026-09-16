@@ -1,0 +1,23 @@
+--- a/gck-rpc-util.c
++++ b/gck-rpc-util.c
+@@ -96,6 +96,20 @@
+ 	switch (type) {
+ 	case CKM_RSA_PKCS_OAEP:
+ 	case CKM_RSA_PKCS_PSS:
++	/*
++	 * CKM_AES_CBC / CKM_AES_CBC_PAD take a plain 16-byte IV as
++	 * pParameter, and CKM_AES_GCM takes a CK_GCM_PARAMS whose IV/AAD
++	 * fields are themselves flat byte buffers. Both are safe to
++	 * forward as an opaque byte array across the RPC link, same as
++	 * the RSA-OAEP/PSS params above. Without these, proto_write_mechanism()
++	 * in gck-rpc-module.c rejects the mechanism locally with
++	 * CKR_MECHANISM_INVALID before ever contacting the daemon, and
++	 * gck_rpc_mechanism_list_purge() strips them out of
++	 * C_GetMechanismList() results.
++	 */
++	case CKM_AES_CBC:
++	case CKM_AES_CBC_PAD:
++	case CKM_AES_GCM:
+ 		return 1;
+ 	default:
+ 		return 0;
